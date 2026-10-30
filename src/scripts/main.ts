@@ -1,28 +1,29 @@
-import data from './data';
-import { input, mode, result, settings } from './dom';
+import { input, mode, result } from './dom';
 import { homo } from './generator';
 import '../style.css';
+import { getExpressionsData } from './datagen';
+
+if (import.meta.env.DEV) {
+  // @ts-ignore
+  window.getExpressionsData = getExpressionsData;
+}
+
+const isDigits = (s: string) => /^[0-9]+$/.test(s);
+function isValidInput() {
+  return mode.value.length <= 5 && isDigits(mode.value) && input.value !== '';
+}
 
 function updateInput() {
-  const num = input.value;
-  if (num === '') {
+  if (!isValidInput()) {
     result.textContent = '';
     return;
   }
-  const option = mode.selectedOptions[0];
-  if (option === null) {
-    return;
-  }
-  const nums = data[option.value as unknown as keyof typeof data];
-  result.textContent = `${num}=${homo(nums)(+num)}`;
+  const num = input.value;
+  const nums = getExpressionsData(+mode.value);
+  result.textContent = `${+num}=${homo(nums)(+num)}`;
 }
 
-settings.addEventListener('submit', (e) => {
-  e.preventDefault();
-  updateInput();
-});
-
-mode.addEventListener('change', () => {
+mode.addEventListener('input', () => {
   updateInput();
 });
 

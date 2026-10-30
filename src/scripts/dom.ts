@@ -7,6 +7,5 @@ function requireElement<T extends HTMLElement>(selector: string): T {
 }
 
 export const input = requireElement<HTMLInputElement>('#input');
-export const settings = requireElement<HTMLFormElement>('#settings');
 export const mode = requireElement<HTMLSelectElement>('#mode');
 export const result = requireElement<HTMLParagraphElement>('#result');

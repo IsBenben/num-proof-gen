@@ -1,5 +1,5 @@
 export const homo = (
-  Nums: Record<string, string>,
+  Nums: Record<string, { toString(): string }>,
 ): ((num: unknown) => string) => {
   /*!
    * This function contains third-party code from itorr/homo (the Homo Number Argument Generator).
@@ -45,7 +45,7 @@ export const homo = (
     if (num === Infinity || Number.isNaN(num))
       return `这么恶臭的${num}有必要论证吗`;
 
-    if (num < 0) return `(⑨)*(${demolish(num * -1)})`.replace(/\*\(1\)/g, '');
+    if (num < 0) return `(负)*(${demolish(num * -1)})`.replace(/\*\(1\)/g, '');
 
     if (!Number.isInteger(num)) {
       // abs(num) is definitely smaller than 2**51
@@ -55,6 +55,7 @@ export const homo = (
         return `(${demolish(num * 10)})/(10)`;
       }
       const n = matched[1].length;
+      console.log(n);
       if (n !== 1) {
         return `(${demolish(num * Math.pow(10, n))})/(10)^(${n})`;
       }
@@ -71,27 +72,28 @@ export const homo = (
   };
   //Finisher
   const finisher = (expr: string): string => {
-    expr = expr.replace(/\d+|⑨/g, (n) => Nums[n]).replace('^', '**');
+    expr = expr.replace(/\d+/g, (n) => Nums[n].toString());
+    expr = expr.replace('负', Nums[-1].toString()).replace('^', '**');
     //As long as it matches ([\*|\/])\(([^\+\-\(\)]+)\), replace it with $1$2
-    while (expr.match(/[\*|\/]\([^\+\-\(\)]+\)/))
-      expr = expr.replace(
-        /([\*|\/])\(([^\+\-\(\)]+)\)/,
-        (_m, $1, $2) => $1 + $2,
-      );
+    // while (expr.match(/[\*|\/]\([^\+\-\(\)]+\)/))
+    //   expr = expr.replace(
+    //     /([\*|\/])\(([^\+\-\(\)]+)\)/,
+    //     (_m, $1, $2) => $1 + $2,
+    //   );
     //As long as it matches ([\+|\-])\(([^\(\)]+)\)([\+|\-|\)]), replace it with $1$2$3
-    while (expr.match(/[\+|\-]\([^\(\)]+\)[\+|\-|\)]/))
-      expr = expr.replace(
-        /([\+|\-])\(([^\(\)]+)\)([\+|\-|\)])/,
-        (_m, $1, $2, $3) => $1 + $2 + $3,
-      );
+    // while (expr.match(/[\+|\-]\([^\(\)]+\)[\+|\-|\)]/))
+    //   expr = expr.replace(
+    //     /([\+|\-])\(([^\(\)]+)\)([\+|\-|\)])/,
+    //     (_m, $1, $2, $3) => $1 + $2 + $3,
+    //   );
     //As long as it matches ([\+|\-])\(([^\(\)]+)\)$, replace it with $1$2
-    while (expr.match(/[\+|\-]\(([^\(\)]+)\)$/))
-      expr = expr.replace(/([\+|\-])\(([^\(\)]+)\)$/, (_m, $1, $2) => $1 + $2);
+    // while (expr.match(/[\+|\-]\(([^\(\)]+)\)$/))
+    //   expr = expr.replace(/([\+|\-])\(([^\(\)]+)\)$/, (_m, $1, $2) => $1 + $2);
     //If there is a bracket in the outermost part, remove it
-    if (expr.match(/^\([^\(\)]+?\)$/))
-      expr = expr.replace(/^\(([^\(\)]+)\)$/, '$1');
+    // if (expr.match(/^\([^\(\)]+?\)$/))
+    //   expr = expr.replace(/^\(([^\(\)]+)\)$/, '$1');
 
-    expr = expr.replace(/\+-/g, '-');
+    // expr = expr.replace(/\+-/g, '-');
     return expr;
   };
   return (num: unknown) => finisher(demolish(num));

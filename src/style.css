@@ -1,0 +1,39 @@
+body {
+  text-align: center;
+  background-color: #333;
+  color: white;
+  transition: background-color 0.5s ease;
+  padding-top: 100px;
+  line-height: 1.5;
+}
+
+h1 {
+  margin-bottom: 0;
+}
+
+input,
+select {
+  text-align: inherit;
+  outline: none;
+  padding: 8px;
+  font-size: 1.5em;
+}
+
+input {
+  background-color: inherit;
+  color: inherit;
+  border: 1px solid white;
+}
+
+select {
+  border: 1px solid #000;
+}
+
+#result {
+  font-size: 2em;
+}
+
+p {
+  padding-left: 10vw;
+  padding-right: 10vw;
+}

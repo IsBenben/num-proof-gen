@@ -1,77 +1,4 @@
-const operators = ['+', '-', '*', '/'] as const;
-type Operator = (typeof operators)[number];
-
-const priorities: Record<Operator, number> = {
-  '+': 1,
-  '-': 1,
-  '*': 2,
-  '/': 2,
-} as const;
-
-const operations: Record<Operator, (a: number, b: number) => number> = {
-  '+': (a, b) => a + b,
-  '-': (a, b) => a - b,
-  '*': (a, b) => a * b,
-  '/': (a, b) => a / b,
-} as const;
-
-type ExpressionLike = ExpressionTree | number;
-
-class ExpressionTree {
-  readonly lst: ExpressionLike;
-  readonly operator: Operator;
-  readonly rst: ExpressionLike;
-  string?: string;
-
-  constructor(
-    lst: ExpressionTree | number,
-    operator: Operator,
-    rst: ExpressionTree | number,
-  ) {
-    this.lst = lst;
-    this.operator = operator;
-    this.rst = rst;
-  }
-
-  toString(): string {
-    if (typeof this.string === 'string') {
-      return this.string;
-    }
-    // 仅考虑论证中出现的正整数表达式
-    let leftString: string = this.lst.toString(),
-      rightString: string = this.rst.toString();
-    if (
-      typeof this.lst === 'object' &&
-      priorities[this.operator] > priorities[this.lst.operator]
-    ) {
-      leftString = `(${leftString})`;
-    }
-    if (
-      typeof this.rst === 'object' &&
-      priorities[this.operator] >= priorities[this.rst.operator]
-    ) {
-      rightString = `(${rightString})`;
-    }
-    this.string = `${leftString}${this.operator}${rightString}`;
-    return this.string;
-  }
-
-  calculate(): number {
-    let leftValue: number, rightValue: number;
-    if (typeof this.lst === 'number') {
-      leftValue = this.lst;
-    } else {
-      leftValue = this.lst.calculate();
-    }
-    if (typeof this.rst === 'number') {
-      rightValue = this.rst;
-    } else {
-      rightValue = this.rst.calculate();
-    }
-    const operation = operations[this.operator];
-    return operation(leftValue, rightValue);
-  }
-}
+import { ExpressionTree, operations, operators, type ExpressionLike } from "./expression";
 
 const constructExpressionTrees = (
   numbers: readonly number[],
@@ -83,7 +10,7 @@ const constructExpressionTrees = (
       return;
     }
     for (let i = 0; i < expressions.length - 1; i++) {
-      for (const j of operators) {
+      for (const j of ['+', '-', '*', '/'] as const) {
         const expressionTree = new ExpressionTree(
           expressions[i],
           j,
@@ -154,7 +81,7 @@ const completeExpressionData = (
 
       for (const A of entries) {
         for (const B of entries) {
-          for (const op of operators) {
+          for (const op of ['+', '-', '*', '/'] as const) {
             const forward = operations[op](A.value, B.value);
             consider(forward, () => new ExpressionTree(A.expr, op, B.expr));
             if (op === '-' || op === '/') {

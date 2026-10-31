@@ -23,7 +23,8 @@ export class ExpressionTree {
   readonly lst: ExpressionLike;
   readonly operator: Operator;
   readonly rst: ExpressionLike;
-  string?: string;
+  private value?: number;
+  private string?: string;
 
   constructor(
     lst: ExpressionTree | number,
@@ -67,6 +68,9 @@ export class ExpressionTree {
   }
 
   calculate(): number {
+    if (typeof this.value === 'number') {
+      return this.value;
+    }
     let leftValue: number, rightValue: number;
     if (typeof this.lst === 'number') {
       leftValue = this.lst;
@@ -79,6 +83,7 @@ export class ExpressionTree {
       rightValue = this.rst.calculate();
     }
     const operation = operations[this.operator];
-    return operation(leftValue, rightValue);
+    this.value = operation(leftValue, rightValue);
+    return this.value;
   }
 }

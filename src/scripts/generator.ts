@@ -4,7 +4,7 @@ export const homo = (
   Nums: Record<string, ExpressionLike>,
 ): ((num: unknown) => string) => {
   /*!
-   * This function contains third-party code from itorr/homo (the Homo Number Argument Generator).
+   * This function contains modified third-party code from itorr/homo (the Homo Number Argument Generator).
    *
    * - Source: https://github.com/itorr/homo
    * - Homepage: https://lab.magiconch.com/homo/

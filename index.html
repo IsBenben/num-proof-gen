@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -10,8 +10,16 @@
     <div id="app">
       <h1>数字论证生成器</h1>
       <h2>NumProof Gen</h2>
-      <div><input id="input" type="number" /></div>
-      <div><input id="mode" type="number" maxlength="5" value="1234" /></div>
+      <form id="settings">
+        <div>
+          <label for="input">要论证的结果为：</label>
+          <input name="input" id="input" type="number" />
+        </div>
+        <div>
+          <label for="mode">用于论证的数字：</label>
+          <input name="mode" id="mode" type="number" maxlength="11" value="1234" />
+        </div>
+      </form>
       <p id="result"></p>
     </div>
     <script type="module" src="/src/scripts/main.ts"></script>

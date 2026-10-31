@@ -1,4 +1,4 @@
-import { ExpressionTree, operations, operators, type ExpressionLike } from "./expression";
+import { ExpressionTree, type ExpressionLike } from './expression';
 
 const constructExpressionTrees = (
   numbers: readonly number[],
@@ -26,82 +26,122 @@ const constructExpressionTrees = (
 };
 
 const arrangeNumbers = (
-  numbers: readonly string[],
+  digits: readonly string[],
+  maxParts: number,
   callback: (numbers: number[]) => any,
 ): void => {
-  let arrange: number[] = [];
+  const arranged: number[] = [];
   const dfs = (index: number): void => {
-    if (index === numbers.length) {
-      callback(arrange);
+    if (index === digits.length) {
+      callback(arranged);
       return;
     }
-    for (let i = 1; i < numbers.length - index + 1; i++) {
-      arrange.push(parseInt(numbers.slice(index, index + i).join(''), 10));
+    if (arranged.length >= maxParts - 1) {
+      const remaining = digits.slice(index).join('');
+      if (remaining.length > 1 && remaining[0] === '0') {
+        return;
+      }
+      callback(arranged.concat(parseInt(remaining, 10)));
+      return;
+    }
+    for (let i = 1; i < digits.length - index + 1; i++) {
+      const remaining = digits.slice(index, index + i).join('');
+      if (remaining.length > 1 && remaining[0] === '0') {
+        continue;
+      }
+      arranged.push(parseInt(remaining, 10));
       dfs(index + i);
-      arrange.pop();
+      arranged.pop();
     }
   };
   dfs(0);
 };
 
 const COMPLETION_TARGETS: number[] = Array.from(
-  { length: 18 }, // -1 到 16，共 18 个
+  { length: 18 },
   (_, i) => i - 1,
 );
+
+const isEquals = (value: number, target: number) =>
+  Math.abs(value - target) <= Math.max(1e-9, Math.abs(target) * 1e-12);
 
 const completeExpressionData = (
   result: Record<string, ExpressionLike>,
 ): Record<string, ExpressionLike> => {
-  const EPSILON = 1e-6;
   let changed = true;
   while (changed) {
     changed = false;
     const missing = COMPLETION_TARGETS.filter(
-      (target) => result[target] === undefined,
+      (target) => result[String(target)] === undefined,
     );
     if (missing.length === 0) break;
 
-    const entries = Object.keys(result).map((key) => {
-      const expr = result[key];
-      const value = typeof expr === 'number' ? expr : expr.calculate();
-      return { value, expr };
-    });
-
     for (const target of missing) {
       let best: ExpressionTree | undefined;
-      const consider = (value: number, make: () => ExpressionTree) => {
-        if (!Number.isFinite(value) || Math.abs(value - target) >= EPSILON)
-          return;
-        const expr = make();
-        const length = expr.toString().length;
-        if (best === undefined || length < best.toString().length) {
+      const consider = (expr: ExpressionTree) => {
+        if (
+          best === undefined ||
+          expr.toString().length < best.toString().length
+        ) {
           best = expr;
         }
       };
 
-      for (const A of entries) {
-        for (const B of entries) {
-          for (const op of ['+', '-', '*', '/'] as const) {
-            const forward = operations[op](A.value, B.value);
-            consider(forward, () => new ExpressionTree(A.expr, op, B.expr));
-            if (op === '-' || op === '/') {
-              const reverse = operations[op](B.value, A.value);
-              consider(reverse, () => new ExpressionTree(B.expr, op, A.expr));
-            }
+      for (const key of Object.keys(result)) {
+        const exprA = result[key];
+        const a = +key;
+
+        // 加法：A + B = target，B = target - a
+        const bAdd = result[String(target - a)];
+        if (bAdd !== undefined) {
+          consider(new ExpressionTree(exprA, '+', bAdd));
+        }
+
+        // 减法正向：A - B = target，B = a - target
+        const bSubForward = result[String(a - target)];
+        if (bSubForward !== undefined) {
+          consider(new ExpressionTree(exprA, '-', bSubForward));
+        }
+
+        // 减法反向：B - A = target，B = target + a
+        const bSubReverse = result[String(target + a)];
+        if (bSubReverse !== undefined) {
+          consider(new ExpressionTree(bSubReverse, '-', exprA));
+        }
+
+        // 乘法：A * B = target，B = target / a
+        if (a !== 0 && target % a === 0) {
+          const bMul = result[String(target / a)];
+          if (bMul !== undefined) {
+            consider(new ExpressionTree(exprA, '*', bMul));
+          }
+        }
+
+        // 除法正向：A / B = target，B = A / target
+        if (target !== 0 && a !== 0 && a % target === 0) {
+          const bDivForward = result[String(a / target)];
+          if (bDivForward !== undefined) {
+            consider(new ExpressionTree(exprA, '/', bDivForward));
+          }
+        }
+
+        // 除法反向：B / A = target，B = target * A
+        if (a !== 0) {
+          const bDivReverse = result[String(target * a)];
+          if (bDivReverse !== undefined) {
+            consider(new ExpressionTree(bDivReverse, '/', exprA));
           }
         }
       }
 
       if (best !== undefined) {
-        result[target] = best;
+        result[String(target)] = best;
         changed = true;
       }
     }
   }
   return result;
 };
-
-const epsilon = 1e-6;
 
 const expressionsData: Record<number, Record<string, ExpressionLike>> = {};
 
@@ -112,25 +152,29 @@ export const getExpressionsData = (
     return expressionsData[number];
   }
   const result: Record<string, ExpressionLike> = {};
-  arrangeNumbers([...number.toString()], (numbers) =>
-    constructExpressionTrees(numbers, (expression) => {
-      const value =
-        typeof expression === 'number' ? expression : expression.calculate();
-      const roundedValue = Math.round(value);
-      if (
-        Number.isFinite(roundedValue) &&
-        roundedValue >= -1 &&
-        Math.abs(value - roundedValue) < epsilon
-      ) {
-        const string = expression.toString();
+  const stringNumber = number.toString();
+  arrangeNumbers(
+    [...stringNumber],
+    stringNumber.length >= 7 ? 5 : 6,
+    (numbers) =>
+      constructExpressionTrees(numbers, (expression) => {
+        const value =
+          typeof expression === 'number' ? expression : expression.calculate();
+        const roundedValue = Math.round(value);
         if (
-          result[roundedValue] === undefined ||
-          string.length < result[roundedValue].toString().length
+          Number.isFinite(roundedValue) &&
+          roundedValue >= -1 &&
+          isEquals(value, roundedValue)
         ) {
-          result[roundedValue] = expression;
+          const string = expression.toString();
+          if (
+            result[roundedValue] === undefined ||
+            string.length < result[roundedValue].toString().length
+          ) {
+            result[roundedValue] = expression;
+          }
         }
-      }
-    }),
+      }),
   );
   expressionsData[number] = completeExpressionData(result);
   return expressionsData[number];

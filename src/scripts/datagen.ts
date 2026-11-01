@@ -1,17 +1,17 @@
-import { ExpressionTree, type ExpressionLike } from './expression';
+import { ExpressionLeaf, ExpressionNode, ExpressionTree } from './expression';
 
 const constructExpressionTrees = (
   numbers: readonly number[],
-  callback: (expression: ExpressionLike) => any,
+  callback: (expression: ExpressionTree) => any,
 ): void => {
-  const dfs = (depth: number, expressions: ExpressionLike[]) => {
+  const dfs = (depth: number, expressions: ExpressionTree[]) => {
     if (expressions.length === 1) {
       callback(expressions[0]);
       return;
     }
     for (let i = 0; i < expressions.length - 1; i++) {
       for (const j of ['+', '-', '*', '/'] as const) {
-        const expressionTree = new ExpressionTree(
+        const expressionTree = new ExpressionNode(
           expressions[i],
           j,
           expressions[i + 1],
@@ -22,7 +22,10 @@ const constructExpressionTrees = (
       }
     }
   };
-  dfs(0, [...numbers]);
+  dfs(
+    0,
+    numbers.map((value) => new ExpressionLeaf(value)),
+  );
 };
 
 const arrangeNumbers = (
@@ -65,9 +68,16 @@ const COMPLETION_TARGETS: number[] = Array.from(
 const isEquals = (value: number, target: number) =>
   Math.abs(value - target) <= Math.max(1e-9, Math.abs(target) * 1e-12);
 
+const isBetterThan = (
+  newExpression: ExpressionTree,
+  oldExpression: ExpressionTree | undefined,
+) =>
+  oldExpression === undefined ||
+  newExpression.toString().length < oldExpression.toString().length;
+
 const completeExpressionData = (
-  result: Record<string, ExpressionLike>,
-): Record<string, ExpressionLike> => {
+  result: Record<string, ExpressionTree>,
+): Record<string, ExpressionTree> => {
   let changed = true;
   while (changed) {
     changed = false;
@@ -79,10 +89,7 @@ const completeExpressionData = (
     for (const target of missing) {
       let best: ExpressionTree | undefined;
       const consider = (expr: ExpressionTree) => {
-        if (
-          best === undefined ||
-          expr.toString().length < best.toString().length
-        ) {
+        if (isBetterThan(expr, best)) {
           best = expr;
         }
       };
@@ -94,26 +101,26 @@ const completeExpressionData = (
         // 加法：A + B = target，B = target - a
         const bAdd = result[String(target - a)];
         if (bAdd !== undefined) {
-          consider(new ExpressionTree(exprA, '+', bAdd));
+          consider(new ExpressionNode(exprA, '+', bAdd));
         }
 
         // 减法正向：A - B = target，B = a - target
         const bSubForward = result[String(a - target)];
         if (bSubForward !== undefined) {
-          consider(new ExpressionTree(exprA, '-', bSubForward));
+          consider(new ExpressionNode(exprA, '-', bSubForward));
         }
 
         // 减法反向：B - A = target，B = target + a
         const bSubReverse = result[String(target + a)];
         if (bSubReverse !== undefined) {
-          consider(new ExpressionTree(bSubReverse, '-', exprA));
+          consider(new ExpressionNode(bSubReverse, '-', exprA));
         }
 
         // 乘法：A * B = target，B = target / a
         if (a !== 0 && target % a === 0) {
           const bMul = result[String(target / a)];
           if (bMul !== undefined) {
-            consider(new ExpressionTree(exprA, '*', bMul));
+            consider(new ExpressionNode(exprA, '*', bMul));
           }
         }
 
@@ -121,7 +128,7 @@ const completeExpressionData = (
         if (target !== 0 && a !== 0 && a % target === 0) {
           const bDivForward = result[String(a / target)];
           if (bDivForward !== undefined) {
-            consider(new ExpressionTree(exprA, '/', bDivForward));
+            consider(new ExpressionNode(exprA, '/', bDivForward));
           }
         }
 
@@ -129,7 +136,7 @@ const completeExpressionData = (
         if (a !== 0) {
           const bDivReverse = result[String(target * a)];
           if (bDivReverse !== undefined) {
-            consider(new ExpressionTree(bDivReverse, '/', exprA));
+            consider(new ExpressionNode(bDivReverse, '/', exprA));
           }
         }
       }
@@ -143,34 +150,29 @@ const completeExpressionData = (
   return result;
 };
 
-const expressionsData: Record<number, Record<string, ExpressionLike>> = {};
+const expressionsData: Record<number, Record<string, ExpressionTree>> = {};
 
 export const getExpressionsData = (
   number: number,
-): Record<string, ExpressionLike> => {
+): Record<string, ExpressionTree> => {
   if (expressionsData[number]) {
     return expressionsData[number];
   }
-  const result: Record<string, ExpressionLike> = {};
+  const result: Record<string, ExpressionTree> = {};
   const stringNumber = number.toString();
   arrangeNumbers(
     [...stringNumber],
     stringNumber.length >= 7 ? 5 : 6,
     (numbers) =>
       constructExpressionTrees(numbers, (expression) => {
-        const value =
-          typeof expression === 'number' ? expression : expression.calculate();
+        const value = expression.calculate();
         const roundedValue = Math.round(value);
         if (
           Number.isFinite(roundedValue) &&
           roundedValue >= -1 &&
           isEquals(value, roundedValue)
         ) {
-          const string = expression.toString();
-          if (
-            result[roundedValue] === undefined ||
-            string.length < result[roundedValue].toString().length
-          ) {
+          if (isBetterThan(expression, result[roundedValue])) {
             result[roundedValue] = expression;
           }
         }

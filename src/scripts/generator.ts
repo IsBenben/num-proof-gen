@@ -1,7 +1,12 @@
-import { ExpressionTree, type ExpressionLike, type Format } from './expression';
+import {
+  ExpressionNode,
+  ExpressionTree,
+  type Format,
+} from './expression';
 
 export const homo = (
-  Nums: Record<string, ExpressionLike>, format: Format
+  Nums: Record<string, ExpressionTree>,
+  format: Format,
 ): ((num: unknown) => string) => {
   /*!
    * This function contains modified third-party code from itorr/homo (the Homo Number Argument Generator).
@@ -41,12 +46,12 @@ export const homo = (
     return 1;
   };
   const isDotRegex = /\.(\d+?)0{0,}$/;
-  const demolish = (num: number): ExpressionLike => {
+  const demolish = (num: number): ExpressionTree => {
     if (num < 0) {
       if (num == -1) {
         return Nums[-1];
       } else {
-        return new ExpressionTree(Nums[-1], '*', demolish(num * -1));
+        return new ExpressionNode(Nums[-1], '*', demolish(num * -1));
       }
     }
 
@@ -55,18 +60,18 @@ export const homo = (
       // rescale
       const matched = num.toFixed(16).match(isDotRegex);
       if (!matched) {
-        return new ExpressionTree(demolish(num * 10), '/', Nums[10]);
+        return new ExpressionNode(demolish(num * 10), '/', Nums[10]);
       }
       const n = matched[1].length;
       if (n !== 1) {
-        return new ExpressionTree(
+        return new ExpressionNode(
           demolish(num * Math.pow(10, n)),
           '/',
-          new ExpressionTree(Nums[10], '^', Nums[n]),
+          new ExpressionNode(Nums[10], '^', Nums[n]),
         );
       }
       if (!matched) {
-        return new ExpressionTree(demolish(num * 10), '/', Nums[10]);
+        return new ExpressionNode(demolish(num * 10), '/', Nums[10]);
       }
     }
 
@@ -78,10 +83,10 @@ export const homo = (
 
     let result = Nums[div];
     if (quotient !== 1) {
-      result = new ExpressionTree(result, '*', demolish(quotient));
+      result = new ExpressionNode(result, '*', demolish(quotient));
     }
     if (remainder !== 0) {
-      result = new ExpressionTree(result, '+', demolish(remainder));
+      result = new ExpressionNode(result, '+', demolish(remainder));
     }
     return result;
   };
@@ -89,10 +94,6 @@ export const homo = (
   return (num: unknown) => {
     if (typeof num !== 'number') return '';
     if (!Number.isFinite(num)) return `这么恶臭的${num}有必要论证吗`;
-    const result = demolish(num);
-    if (typeof result === 'number') {
-      return result.toString()
-    }
-    return result.toStringCustom(format);
+    return demolish(num).toStringCustom(format);
   };
 };

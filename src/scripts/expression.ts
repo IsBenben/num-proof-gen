@@ -57,31 +57,28 @@ export const operations: Record<Operator, (a: number, b: number) => number> = {
   '^': (a, b) => Math.pow(a, b),
 } as const;
 
-export type ExpressionLike = ExpressionTree | number;
-
-const renderExpressionLike = (
-  expression: ExpressionLike,
-  format: Format,
-): string =>
-  typeof expression === 'number'
-    ? expression.toString()
-    : expression.toStringCustom(format);
-
 const applyParentheses = (string: string, format: Format): string =>
   format !== formats.TEX ? `(${string})` : `\\left(${string}\\right)`;
 
-export class ExpressionTree {
-  readonly lst: ExpressionLike;
+export abstract class ExpressionTree {
+  abstract calculate(): number;
+  abstract toStringCustom(format: Format): string;
+  abstract getPriority(): number;
+
+  toString(): string {
+    return this.toStringCustom(formats.DEFAULT);
+  }
+}
+
+export class ExpressionNode extends ExpressionTree {
+  readonly lst: ExpressionTree;
   readonly operator: Operator;
-  readonly rst: ExpressionLike;
+  readonly rst: ExpressionTree;
   private value?: number;
   private stringCache: Partial<Record<Format, string>>;
 
-  constructor(
-    lst: ExpressionTree | number,
-    operator: Operator,
-    rst: ExpressionTree | number,
-  ) {
+  constructor(lst: ExpressionTree, operator: Operator, rst: ExpressionTree) {
+    super();
     this.lst = lst;
     this.operator = operator;
     this.rst = rst;
@@ -98,12 +95,12 @@ export class ExpressionTree {
     }
     // 仅考虑论证中出现的正整数表达式
     // 此处简化处理^，不考虑从右至左运算
-    let leftString: string = renderExpressionLike(this.lst, format),
-      rightString: string = renderExpressionLike(this.rst, format);
+    let leftString: string = this.lst.toStringCustom(format),
+      rightString: string = this.rst.toStringCustom(format);
 
     if (format === formats.TEX) {
       if (this.operator === '^') {
-        if (typeof leftString !== 'number') {
+        if (this.getPriority() > this.lst.getPriority()) {
           leftString = applyParentheses(leftString, format);
         }
         this.stringCache[format] = `{${leftString}}^{${rightString}}`;
@@ -111,20 +108,13 @@ export class ExpressionTree {
       }
     }
 
-    if (
-      typeof this.lst === 'object' &&
-      priorities[this.operator] > priorities[this.lst.operator]
-    ) {
+    if (this.getPriority() > this.lst.getPriority()) {
       leftString = applyParentheses(leftString, format);
     }
-    if (
-      typeof this.rst === 'object' &&
-      priorities[this.operator] > priorities[this.rst.operator]
-    ) {
+    if (this.getPriority() > this.rst.getPriority()) {
       rightString = applyParentheses(rightString, format);
     } else if (
-      typeof this.rst === 'object' &&
-      priorities[this.operator] == priorities[this.rst.operator] &&
+      this.getPriority() == this.rst.getPriority() &&
       !(this.operator === '+' || this.operator === '*')
     ) {
       // 不满足交换律
@@ -140,19 +130,35 @@ export class ExpressionTree {
     if (typeof this.value === 'number') {
       return this.value;
     }
-    let leftValue: number, rightValue: number;
-    if (typeof this.lst === 'number') {
-      leftValue = this.lst;
-    } else {
-      leftValue = this.lst.calculate();
-    }
-    if (typeof this.rst === 'number') {
-      rightValue = this.rst;
-    } else {
-      rightValue = this.rst.calculate();
-    }
+    const leftValue = this.lst.calculate();
+    const rightValue = this.rst.calculate();
     const operation = operations[this.operator];
     this.value = operation(leftValue, rightValue);
     return this.value;
+  }
+
+  getPriority() {
+    return !this.rst ? 4 : priorities[this.operator];
+  }
+}
+
+export class ExpressionLeaf extends ExpressionTree {
+  readonly value: number;
+
+  constructor(value: number) {
+    super();
+    this.value = value;
+  }
+
+  toStringCustom(_: Format): string {
+    return this.value.toString();
+  }
+
+  calculate(): number {
+    return this.value;
+  }
+
+  getPriority() {
+    return 99;
   }
 }

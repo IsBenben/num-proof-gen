@@ -13,7 +13,7 @@ import {
 import { homo } from './generator';
 import '../style.css';
 import { getExpressionsData } from './datagen';
-import { formats, type ExpressionLike, type Format } from './expression';
+import { formats, type ExpressionTree, type Format } from './expression';
 
 if (import.meta.env.DEV) {
   // @ts-ignore
@@ -22,7 +22,8 @@ if (import.meta.env.DEV) {
 
 const isDigits = (s: string) => /^[0-9]+$/.test(s);
 function isValidInput() {
-  return mode.value.length <= 11 && isDigits(mode.value) && input.value !== '';
+  const isValidMode = mode.value.length <= 11 && isDigits(mode.value) && mode.value[0] !== '0';
+  return isValidMode && input.value !== '';
 }
 
 // tabs
@@ -51,7 +52,7 @@ otherFormatsCopies.forEach((copy, index) => {
 const formatsOrder: Format[] = [formats.MATH, formats.PYTHON, formats.TEX];
 function updateOtherFormatsPres(
   num: number,
-  nums: Record<string, ExpressionLike>,
+  nums: Record<string, ExpressionTree>,
 ) {
   otherFormatsPres.forEach((pre, index) => {
     const mappedContent = homo(nums, formatsOrder[index])(num);

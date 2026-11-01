@@ -17,10 +17,42 @@
         </div>
         <div>
           <label for="mode">用于论证的数字：</label>
-          <input name="mode" id="mode" type="number" maxlength="11" value="1234" />
+          <input
+            name="mode"
+            id="mode"
+            type="number"
+            maxlength="11"
+            value="1234"
+          />
         </div>
       </form>
       <p id="result"></p>
+      <div id="other-formats" style="display: none">
+        <div class="tabs">
+          <button>数学符号</button>
+          <button>Python</button>
+          <button>TeX</button>
+        </div>
+        <div class="tab" style="display: block">
+          <pre></pre>
+          <div>
+            <span class="chars"></span><span>数学符号</span
+            ><button>复制</button>
+          </div>
+        </div>
+        <div class="tab" style="display: none">
+          <pre></pre>
+          <div>
+            <span class="chars"></span><span>Python</span><button>复制</button>
+          </div>
+        </div>
+        <div class="tab" style="display: none">
+          <pre></pre>
+          <div>
+            <span class="chars"></span><span>TeX</span><button>复制</button>
+          </div>
+        </div>
+      </div>
     </div>
     <script type="module" src="/src/scripts/main.ts"></script>
   </body>

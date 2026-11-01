@@ -1,7 +1,7 @@
-import { ExpressionTree, type ExpressionLike } from './expression';
+import { ExpressionTree, type ExpressionLike, type Format } from './expression';
 
 export const homo = (
-  Nums: Record<string, ExpressionLike>,
+  Nums: Record<string, ExpressionLike>, format: Format
 ): ((num: unknown) => string) => {
   /*!
    * This function contains modified third-party code from itorr/homo (the Homo Number Argument Generator).
@@ -58,7 +58,6 @@ export const homo = (
         return new ExpressionTree(demolish(num * 10), '/', Nums[10]);
       }
       const n = matched[1].length;
-      console.log(n);
       if (n !== 1) {
         return new ExpressionTree(
           demolish(num * Math.pow(10, n)),
@@ -90,6 +89,10 @@ export const homo = (
   return (num: unknown) => {
     if (typeof num !== 'number') return '';
     if (!Number.isFinite(num)) return `这么恶臭的${num}有必要论证吗`;
-    return demolish(num).toString();
+    const result = demolish(num);
+    if (typeof result === 'number') {
+      return result.toString()
+    }
+    return result.toStringCustom(format);
   };
 };

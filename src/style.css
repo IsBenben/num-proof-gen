@@ -7,33 +7,69 @@ body {
   line-height: 1.5;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 h1 {
   margin-bottom: 0;
 }
 
+/* 表单 */
+
 input,
-select {
+button {
   text-align: inherit;
   outline: none;
-  padding: 8px;
-  font-size: 1.5em;
-}
-
-input {
+  padding: 4px 8px;
   background-color: inherit;
   color: inherit;
   border: 1px solid white;
+  font-family: inherit;
 }
 
-select {
-  border: 1px solid #000;
+input {
+  font-size: 1.5em;
+  width: 350px;
+}
+
+button {
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+button:hover {
+  background-color: #444;
+}
+
+button:active {
+  background-color: #555;
+}
+
+/* 结果显示 */
+
+#result,
+#other-formats {
+  padding-left: 10vw;
+  padding-right: 10vw;
 }
 
 #result {
   font-size: 2em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-p {
-  padding-left: 10vw;
-  padding-right: 10vw;
+#other-formats {
+  text-align: left;
+}
+
+pre {
+  font-family: Consolas, monospace;
+  white-space: inherit;
+}
+
+#other-formats .tab span {
+  margin-right: 10px;
 }

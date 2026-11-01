@@ -28,7 +28,7 @@ button {
   font-family: inherit;
 }
 
-input {
+input[type='number'] {
   font-size: 1.5em;
   width: 350px;
 }
@@ -45,6 +45,39 @@ button:hover {
 
 button:active {
   background-color: #555;
+}
+
+input[type='checkbox'] {
+  width: 40px;
+  height: 20px;
+  background: #ccc;
+  appearance: none;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+  transition: 0.1s background-color;
+}
+
+input[type='checkbox']::before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #fff;
+  top: 2px;
+  left: 2px;
+  transition: 0.1s left;
+}
+
+input[type='checkbox']:checked {
+  background-color: #0c0;
+}
+
+input[type='checkbox']:checked::before {
+  left: 22px;
 }
 
 /* 结果显示 */

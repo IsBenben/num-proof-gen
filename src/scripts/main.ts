@@ -9,6 +9,7 @@ import {
   otherFormatsTabs,
   result,
   settings,
+  enableRandom,
 } from './dom';
 import { homo } from './generator';
 import '../style.css';
@@ -22,8 +23,27 @@ if (import.meta.env.DEV) {
 
 const isDigits = (s: string) => /^[0-9]+$/.test(s);
 function isValidInput() {
-  const isValidMode = mode.value.length <= 11 && isDigits(mode.value) && mode.value[0] !== '0';
+  const isValidMode =
+    mode.value.length <= 11 && isDigits(mode.value) && mode.value[0] !== '0';
   return isValidMode && input.value !== '';
+}
+
+function generate(
+  Nums: Record<string, ExpressionTree>,
+  format: Format,
+  number: unknown,
+): string {
+  let best = homo(Nums, format, 1)(number);
+  if (!enableRandom.checked) {
+    return best;
+  }
+  for (let i = 1; i > 0.05; i -= 0.05) {
+    const string = homo(Nums, format, i)(number);
+    if (string.length < best.length) {
+      best = string;
+    }
+  }
+  return best;
 }
 
 // tabs
@@ -55,7 +75,7 @@ function updateOtherFormatsPres(
   nums: Record<string, ExpressionTree>,
 ) {
   otherFormatsPres.forEach((pre, index) => {
-    const mappedContent = homo(nums, formatsOrder[index])(num);
+    const mappedContent = generate(nums, formatsOrder[index], num);
     pre.textContent = mappedContent;
     otherFormatsChars[index].textContent = mappedContent.length + '字符';
   });
@@ -69,7 +89,7 @@ function updateInput() {
   }
   const num = input.value;
   const nums = getExpressionsData(+mode.value);
-  result.textContent = `${+num}=${homo(nums, formats.DEFAULT)(+num)}`;
+  result.textContent = `${+num}=${generate(nums, formats.DEFAULT, +num)}`;
   otherFormats.style.display = 'block';
   updateOtherFormatsPres(+num, nums);
 }
@@ -80,6 +100,10 @@ settings.addEventListener('submit', (e) => {
 });
 
 mode.addEventListener('input', () => {
+  updateInput();
+});
+
+enableRandom.addEventListener('input', () => {
   updateInput();
 });
 

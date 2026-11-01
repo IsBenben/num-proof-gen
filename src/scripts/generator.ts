@@ -1,12 +1,10 @@
-import {
-  ExpressionNode,
-  ExpressionTree,
-  type Format,
-} from './expression';
+import { ExpressionNode, ExpressionTree, type Format } from './expression';
+import { SeedRandom } from './seedrandom';
 
 export const homo = (
   Nums: Record<string, ExpressionTree>,
   format: Format,
+  prob: number,
 ): ((num: unknown) => string) => {
   /*!
    * This function contains modified third-party code from itorr/homo (the Homo Number Argument Generator).
@@ -37,12 +35,14 @@ export const homo = (
    * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    * SOFTWARE.
    */
+  const random = new SeedRandom();
   const numsReversed: number[] = Object.keys(Nums)
     .map((x) => +x)
     .filter((x) => x > 0);
   const getMinDiv = (num: number): number => {
     for (let i = numsReversed.length - 1; i >= 0; i--)
-      if (num >= numsReversed[i]) return numsReversed[i];
+      if (num >= numsReversed[i] && random.next() < prob)
+        return numsReversed[i];
     return 1;
   };
   const isDotRegex = /\.(\d+?)0{0,}$/;

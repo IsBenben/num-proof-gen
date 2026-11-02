@@ -15,6 +15,7 @@ export const mode = requireElement<HTMLSelectElement>('#mode');
 export const input = requireElement<HTMLInputElement>('#input');
 export const enableRandom = requireElement<HTMLInputElement>('#enable-random');
 export const result = requireElement<HTMLParagraphElement>('#result');
+export const footer = requireElement<HTMLElement>('#footer');
 
 export const otherFormats = requireElement<HTMLDivElement>('#other-formats');
 export const otherFormatsButtons: NodeListOf<HTMLButtonElement> =

@@ -10,6 +10,7 @@ import {
   otherFormatsPre,
   otherFormatsChars,
   otherFormatsFormat,
+  footer,
 } from './dom';
 import { homo } from './generator';
 import '../style.css';
@@ -74,8 +75,9 @@ function updateOutput() {
   const bestProb = generate(nums, formats.DEFAULT, +num);
 
   result.textContent = `${+num}=${homo(nums, formats.DEFAULT, bestProb)(+num)}`;
-  otherFormats.style.display = 'block';
+  footer.style.paddingTop = '0';
 
+  otherFormats.style.display = 'block';
   const otherFormatsContent = homo(
     nums,
     formatsOrder[currentTab],
@@ -89,6 +91,7 @@ function updateOutput() {
 function updateInput() {
   if (!isValidInput()) {
     result.textContent = '';
+    footer.style.paddingTop = '50px';
     otherFormats.style.display = 'none';
     return;
   }

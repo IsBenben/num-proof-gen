@@ -138,7 +138,7 @@ export class ExpressionNode extends ExpressionTree {
   }
 
   getPriority() {
-    return !this.rst ? 4 : priorities[this.operator];
+    return priorities[this.operator];
   }
 }
 

@@ -3,7 +3,7 @@ body {
   background-color: #333;
   color: white;
   transition: background-color 0.5s ease;
-  padding-top: 100px;
+  padding-top: 70px;
   line-height: 1.5;
 }
 
@@ -26,6 +26,7 @@ button {
   color: inherit;
   border: 1px solid white;
   font-family: inherit;
+  vertical-align: middle;
 }
 
 input[type='number'] {
@@ -55,7 +56,6 @@ input[type='checkbox'] {
   border-radius: 10px;
   cursor: pointer;
   position: relative;
-  vertical-align: middle;
   transition: 0.1s background-color;
 }
 
@@ -80,6 +80,11 @@ input[type='checkbox']:checked::before {
   left: 22px;
 }
 
+.enable-random-container {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
 /* 结果显示 */
 p,
 pre {
@@ -89,8 +94,8 @@ pre {
 
 #result,
 #other-formats {
-  padding-left: 10vw;
-  padding-right: 10vw;
+  margin-left: 10vw;
+  margin-right: 10vw;
 }
 
 #result {
@@ -99,6 +104,9 @@ pre {
 
 #other-formats {
   text-align: left;
+  background-color: #3a3a3a;
+  padding: 8px;
+  border-radius: 8px;
 }
 
 pre {
@@ -108,4 +116,20 @@ pre {
 
 #other-formats .tab span {
   margin-right: 10px;
+}
+
+/* 页尾 */
+footer {
+  color: #fffc;
+  margin: 1em 0;
+}
+
+a {
+  color: inherit;
+  transition: 0.1s color;
+}
+
+a:hover {
+  opacity: 0.8;
+  color: #fffa;
 }

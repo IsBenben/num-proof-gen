@@ -3,13 +3,13 @@ import {
   mode,
   otherFormats,
   otherFormatsButtons,
-  otherFormatsCopies,
-  otherFormatsPres,
-  otherFormatsChars,
-  otherFormatsTabs,
   result,
   settings,
   enableRandom,
+  otherFormatsCopy,
+  otherFormatsPre,
+  otherFormatsChars,
+  otherFormatsFormat,
 } from './dom';
 import { homo } from './generator';
 import '../style.css';
@@ -31,54 +31,59 @@ function isValidInput() {
 function generate(
   Nums: Record<string, ExpressionTree>,
   format: Format,
-  number: unknown,
-): string {
-  let best = homo(Nums, format, 1)(number);
+  number: number,
+): number {
   if (!enableRandom.checked) {
-    return best;
+    return 1;
   }
-  for (let i = 1; i > 0.05; i -= 0.05) {
+  let best = homo(Nums, format, 1)(number),
+    bestI = 1;
+  for (let i = 1; i > 0.01; i -= 0.01) {
     const string = homo(Nums, format, i)(number);
     if (string.length < best.length) {
       best = string;
+      bestI = i;
     }
   }
-  return best;
+  return bestI;
 }
 
-// tabs
+// other formats
 function copyText(text: string) {
   return navigator.clipboard.writeText(text);
 }
 
+let currentTab: number = 0;
+
 otherFormatsButtons.forEach((button, buttonIndex) => {
   button.addEventListener('click', () => {
-    otherFormatsTabs.forEach((tab, tabIndex) => {
-      if (buttonIndex === tabIndex) {
-        tab.style.display = 'block';
-      } else {
-        tab.style.display = 'none';
-      }
-    });
+    currentTab = buttonIndex;
+    updateOutput();
   });
 });
 
-otherFormatsCopies.forEach((copy, index) => {
-  copy.addEventListener('click', () => {
-    copyText(otherFormatsPres[index].textContent);
-  });
+otherFormatsCopy.addEventListener('click', () => {
+  copyText(otherFormatsPre.textContent);
 });
 
 const formatsOrder: Format[] = [formats.MATH, formats.PYTHON, formats.TEX];
-function updateOtherFormatsPres(
-  num: number,
-  nums: Record<string, ExpressionTree>,
-) {
-  otherFormatsPres.forEach((pre, index) => {
-    const mappedContent = generate(nums, formatsOrder[index], num);
-    pre.textContent = mappedContent;
-    otherFormatsChars[index].textContent = mappedContent.length + '字符';
-  });
+
+function updateOutput() {
+  const num = input.value;
+  const nums = getExpressionsData(+mode.value);
+  const bestProb = generate(nums, formats.DEFAULT, +num);
+
+  result.textContent = `${+num}=${homo(nums, formats.DEFAULT, bestProb)(+num)}`;
+  otherFormats.style.display = 'block';
+
+  const otherFormatsContent = homo(
+    nums,
+    formatsOrder[currentTab],
+    bestProb,
+  )(+num);
+  otherFormatsPre.textContent = otherFormatsContent;
+  otherFormatsChars.textContent = otherFormatsContent.length + '字符';
+  otherFormatsFormat.textContent = otherFormatsButtons[currentTab].textContent;
 }
 
 function updateInput() {
@@ -87,11 +92,7 @@ function updateInput() {
     otherFormats.style.display = 'none';
     return;
   }
-  const num = input.value;
-  const nums = getExpressionsData(+mode.value);
-  result.textContent = `${+num}=${generate(nums, formats.DEFAULT, +num)}`;
-  otherFormats.style.display = 'block';
-  updateOtherFormatsPres(+num, nums);
+  updateOutput();
 }
 
 settings.addEventListener('submit', (e) => {

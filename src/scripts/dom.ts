@@ -1,5 +1,8 @@
-function requireElement<T extends HTMLElement>(selector: string): T {
-  const el = document.querySelector<T>(selector);
+function requireElement<T extends HTMLElement>(
+  selector: string,
+  parentNode: ParentNode = document,
+): T {
+  const el = parentNode.querySelector<T>(selector);
   if (import.meta.env.DEV && !el) {
     throw new Error(`Required element not found: ${selector}`);
   }
@@ -16,11 +19,11 @@ export const result = requireElement<HTMLParagraphElement>('#result');
 export const otherFormats = requireElement<HTMLDivElement>('#other-formats');
 export const otherFormatsButtons: NodeListOf<HTMLButtonElement> =
   otherFormats.querySelectorAll('.tabs button');
-export const otherFormatsTabs: NodeListOf<HTMLDivElement> =
-  otherFormats.querySelectorAll('.tab');
-export const otherFormatsPres: NodeListOf<HTMLPreElement> =
-  otherFormats.querySelectorAll('.tab pre');
-export const otherFormatsChars: NodeListOf<HTMLSpanElement> =
-  otherFormats.querySelectorAll('.tab .chars');
-export const otherFormatsCopies: NodeListOf<HTMLSpanElement> =
-  otherFormats.querySelectorAll('.tab button');
+export const otherFormatsPre =
+  requireElement<HTMLPreElement>('#other-formats pre', otherFormats);
+export const otherFormatsChars =
+  requireElement<HTMLSpanElement>('#other-formats-chars', otherFormats);
+  export const otherFormatsFormat =
+  requireElement<HTMLSpanElement>('#other-formats-format', otherFormats);
+export const otherFormatsCopy =
+  requireElement<HTMLButtonElement>('#other-formats-copy', otherFormats);

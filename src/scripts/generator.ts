@@ -5,7 +5,7 @@ export const homo = (
   Nums: Record<string, ExpressionTree>,
   format: Format,
   prob: number,
-): ((num: unknown) => string) => {
+): ((num: number) => string) => {
   /*!
    * This function contains modified third-party code from itorr/homo (the Homo Number Argument Generator).
    *
@@ -91,8 +91,7 @@ export const homo = (
     return result;
   };
 
-  return (num: unknown) => {
-    if (typeof num !== 'number') return '';
+  return (num: number) => {
     if (!Number.isFinite(num)) return `这么恶臭的${num}有必要论证吗`;
     return demolish(num).toStringCustom(format);
   };

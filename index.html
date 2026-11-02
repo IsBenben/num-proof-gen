@@ -27,7 +27,7 @@
         </div>
         <div>
           <label for="enable-random">启用随机数</label>
-          <input type="checkbox" name="enable-random" id="enable-random">
+          <input type="checkbox" name="enable-random" id="enable-random" />
         </div>
       </form>
       <p id="result"></p>
@@ -37,23 +37,12 @@
           <button>Python</button>
           <button>TeX</button>
         </div>
-        <div class="tab" style="display: block">
+        <div style="display: block">
           <pre></pre>
           <div>
-            <span class="chars"></span><span>数学符号</span
-            ><button>复制</button>
-          </div>
-        </div>
-        <div class="tab" style="display: none">
-          <pre></pre>
-          <div>
-            <span class="chars"></span><span>Python</span><button>复制</button>
-          </div>
-        </div>
-        <div class="tab" style="display: none">
-          <pre></pre>
-          <div>
-            <span class="chars"></span><span>TeX</span><button>复制</button>
+            <span id="other-formats-chars"></span>
+            <span id="other-formats-format"></span>
+            <button id="other-formats-copy">复制</button>
           </div>
         </div>
       </div>

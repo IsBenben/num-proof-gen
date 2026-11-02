@@ -81,6 +81,11 @@ input[type='checkbox']:checked::before {
 }
 
 /* 结果显示 */
+p,
+pre {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 
 #result,
 #other-formats {
@@ -90,8 +95,6 @@ input[type='checkbox']:checked::before {
 
 #result {
   font-size: 2em;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 #other-formats {

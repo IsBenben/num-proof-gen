@@ -3,6 +3,7 @@ import { ExpressionLeaf, ExpressionNode, ExpressionTree } from './expression';
 const constructExpressionTrees = (
   numbers: readonly number[],
   callback: (expression: ExpressionTree) => void,
+  exactDivisionOnly?: boolean,
 ): void => {
   const dfs = (depth: number, expressions: ExpressionTree[]) => {
     if (expressions.length === 1) {
@@ -16,6 +17,9 @@ const constructExpressionTrees = (
           j,
           expressions[i + 1],
         );
+        if (exactDivisionOnly && !expressionTree.isExact()) {
+          continue;
+        }
         expressions.splice(i, 2, expressionTree);
         dfs(depth + 1, expressions);
         expressions.splice(i, 1, expressionTree.lst, expressionTree.rst);
@@ -66,7 +70,7 @@ const COMPLETION_TARGETS: number[] = Array.from(
 );
 
 const isEquals = (value: number, target: number) =>
-  Math.abs(value - target) <= Math.max(1e-9, Math.abs(target) * 1e-12);
+  Math.abs(value - target) <= Math.max(1e-12, Math.abs(target) * 1e-12);
 
 const isBetterThan = (
   newExpression: ExpressionTree,
@@ -150,13 +154,15 @@ const completeExpressionData = (
   return result;
 };
 
-const expressionsData: Record<number, Record<string, ExpressionTree>> = {};
+const expressionsData: Record<string, Record<string, ExpressionTree>> = {};
 
 export const getExpressionsData = (
   number: number,
+  exactDivisionOnly?: boolean,
 ): Record<string, ExpressionTree> => {
-  if (expressionsData[number]) {
-    return expressionsData[number];
+  const cacheKey = `${number}${exactDivisionOnly}`;
+  if (expressionsData[cacheKey]) {
+    return expressionsData[cacheKey];
   }
   const result: Record<string, ExpressionTree> = {};
   const stringNumber = number.toString();
@@ -164,20 +170,24 @@ export const getExpressionsData = (
     [...stringNumber],
     stringNumber.length >= 7 ? 5 : 6,
     (numbers) =>
-      constructExpressionTrees(numbers, (expression) => {
-        const value = expression.calculate();
-        const roundedValue = Math.round(value);
-        if (
-          Number.isFinite(roundedValue) &&
-          roundedValue >= -1 &&
-          isEquals(value, roundedValue)
-        ) {
-          if (isBetterThan(expression, result[roundedValue])) {
-            result[roundedValue] = expression;
+      constructExpressionTrees(
+        numbers,
+        (expression) => {
+          const value = expression.calculate();
+          const roundedValue = Math.round(value);
+          if (
+            Number.isFinite(roundedValue) &&
+            roundedValue >= -1 &&
+            isEquals(value, roundedValue)
+          ) {
+            if (isBetterThan(expression, result[roundedValue])) {
+              result[roundedValue] = expression;
+            }
           }
-        }
-      }),
+        },
+        exactDivisionOnly,
+      ),
   );
-  expressionsData[number] = completeExpressionData(result);
-  return expressionsData[number];
+  expressionsData[cacheKey] = completeExpressionData(result);
+  return expressionsData[cacheKey];
 };

@@ -13,6 +13,7 @@ import {
   otherFormatsFormat,
   footer,
   randomExample,
+  exactDivisionOnly,
 } from './dom';
 import { homo } from './generator';
 import { getExpressionsData } from './datagen';
@@ -30,7 +31,7 @@ if (import.meta.env.DEV) {
 const isDigits = (s: string) => /^[0-9]+$/.test(s);
 function isValidInput() {
   const isValidMode =
-    mode.value.length <= 11 && isDigits(mode.value) && mode.value[0] !== '0';
+    mode.value.length <= 13 && isDigits(mode.value) && mode.value[0] !== '0';
   return isValidMode && input.value !== '';
 }
 
@@ -80,8 +81,10 @@ function updateHash() {
     return;
   }
   let hash: string = `#${input.value},${mode.value}`;
-  if (enableRandom.checked) {
-    hash = hash + ',1';
+  const checkBoxValue =
+    (+exactDivisionOnly.checked << 1) | +enableRandom.checked;
+  if (checkBoxValue) {
+    hash = hash + ',' + checkBoxValue;
   }
   window.location.hash = hash;
 }
@@ -96,7 +99,7 @@ function updateOutput() {
 
   const num = input.value,
     modeValue = +mode.value;
-  const nums = getExpressionsData(modeValue);
+  const nums = getExpressionsData(modeValue, exactDivisionOnly.checked);
   const bestProb = generate(nums, formats.DEFAULT, +num);
 
   result.textContent = `${+num}=${homo(nums, formats.DEFAULT, bestProb)(+num)}`;
@@ -149,7 +152,7 @@ function loadShareLink() {
   if (parts.length === 0) return;
   const num = partToValue(parts[0]),
     modeValue = partToValue(parts[1]),
-    enableRandomValue = parts[2];
+    checkboxValue = +parts[2];
   let changed = false;
   if (num !== '') {
     input.value = num;
@@ -159,8 +162,13 @@ function loadShareLink() {
     mode.value = modeValue;
     changed = true;
   }
-  if (enableRandomValue === '0' || enableRandomValue === '1') {
-    enableRandom.checked = enableRandomValue === '1';
+  if (0 <= checkboxValue && checkboxValue <= 3) {
+    if ((checkboxValue & 1) !== 0) {
+      enableRandom.checked = true;
+    }
+    if ((checkboxValue & 2) !== 0) {
+      exactDivisionOnly.checked = true;
+    }
     changed = true;
   }
   if (changed) {
@@ -185,6 +193,10 @@ settings.addEventListener('submit', (e) => {
   onInputChanged();
 });
 
+input.addEventListener('input', () => {
+  onInputChanged();
+});
+
 mode.addEventListener('input', () => {
   onInputChanged();
 });
@@ -193,6 +205,6 @@ enableRandom.addEventListener('input', () => {
   onInputChanged();
 });
 
-input.addEventListener('input', () => {
+exactDivisionOnly.addEventListener('input', () => {
   onInputChanged();
 });

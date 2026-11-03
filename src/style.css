@@ -106,9 +106,10 @@ input[type='checkbox']:checked::before {
   }
 }
 
-.enable-random-container {
+.checkbox-container {
   padding-top: 4px;
   padding-bottom: 4px;
+  display: inline-block;
 }
 
 /* 结果显示 */

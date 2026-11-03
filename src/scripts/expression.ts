@@ -64,6 +64,7 @@ export abstract class ExpressionTree {
   abstract calculate(): number;
   abstract toStringCustom(format: Format): string;
   abstract getPriority(): number;
+  abstract isExact(): boolean;
 
   toString(): string {
     return this.toStringCustom(formats.DEFAULT);
@@ -76,6 +77,7 @@ export class ExpressionNode extends ExpressionTree {
   readonly rst: ExpressionTree;
   private value?: number;
   private stringCache: Partial<Record<Format, string>>;
+  private isExactCache?: boolean;
 
   constructor(lst: ExpressionTree, operator: Operator, rst: ExpressionTree) {
     super();
@@ -90,7 +92,7 @@ export class ExpressionNode extends ExpressionTree {
   }
 
   toStringCustom(format: Format): string {
-    if (typeof this.stringCache[format] === 'string') {
+    if (this.stringCache[format] !== undefined) {
       return this.stringCache[format];
     }
     // 仅考虑论证中出现的正整数表达式
@@ -127,7 +129,7 @@ export class ExpressionNode extends ExpressionTree {
   }
 
   calculate(): number {
-    if (typeof this.value === 'number') {
+    if (this.value !== undefined) {
       return this.value;
     }
     const leftValue = this.lst.calculate();
@@ -137,8 +139,21 @@ export class ExpressionNode extends ExpressionTree {
     return this.value;
   }
 
-  getPriority() {
+  getPriority(): number {
     return priorities[this.operator];
+  }
+
+  isExact(): boolean {
+    if (this.isExactCache !== undefined) {
+      return this.isExactCache;
+    }
+    const result =
+      this.lst.isExact() &&
+      this.rst.isExact() &&
+      (this.operator !== '/' ||
+        this.lst.calculate() % this.rst.calculate() === 0);
+    this.isExactCache = result;
+    return result;
   }
 }
 
@@ -158,7 +173,13 @@ export class ExpressionLeaf extends ExpressionTree {
     return this.value;
   }
 
-  getPriority() {
+  getPriority(): number {
     return 99;
+  }
+
+  isExact(): boolean {
+    return (
+      Number.isInteger(this.value) && this.value <= Number.MAX_SAFE_INTEGER
+    );
   }
 }

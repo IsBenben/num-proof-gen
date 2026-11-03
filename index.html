@@ -21,13 +21,17 @@
             name="mode"
             id="mode"
             type="number"
-            maxlength="11"
+            maxlength="13"
             value="1234"
           />
         </div>
-        <div class="enable-random-container">
+        <div class="checkbox-container">
           <label for="enable-random">启用随机数</label>
           <input type="checkbox" name="enable-random" id="enable-random" />
+        </div>
+        <div class="checkbox-container">
+          <label for="exact-division-only">仅允许整除</label>
+          <input type="checkbox" name="exact-division-only" id="exact-division-only" />
         </div>
       </form>
       <p id="result"></p>

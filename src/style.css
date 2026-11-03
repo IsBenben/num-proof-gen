@@ -1,3 +1,7 @@
+html {
+  color-scheme: dark;
+}
+
 body {
   text-align: center;
   background-color: #333;
@@ -42,6 +46,7 @@ input {
 input[type='number'] {
   font-size: 1.5em;
   width: 350px;
+  max-width: 80vw;
 }
 
 button {
@@ -90,6 +95,17 @@ input[type='checkbox']:checked::before {
   left: 22px;
 }
 
+@media (max-width: 720px) {
+  input[type='number'] {
+    display: block;
+    margin: 0 auto;
+  }
+
+  #settings div {
+    margin-top: 0.5em;
+  }
+}
+
 .enable-random-container {
   padding-top: 4px;
   padding-bottom: 4px;
@@ -107,6 +123,15 @@ pre {
 #getting-started {
   margin-left: 10vw;
   margin-right: 10vw;
+}
+
+@media (max-width: 720px) {
+  #result,
+  #other-formats,
+  #getting-started {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 #result {

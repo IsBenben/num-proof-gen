@@ -26,6 +26,9 @@ button {
   color: inherit;
   border: 1px solid white;
   font-family: inherit;
+}
+
+input {
   vertical-align: middle;
 }
 

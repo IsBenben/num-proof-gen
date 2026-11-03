@@ -69,48 +69,94 @@ otherFormatsCopy.addEventListener('click', () => {
 
 const formatsOrder: Format[] = [formats.MATH, formats.PYTHON, formats.TEX];
 
-function updateOutput() {
-  const num = input.value;
-  const nums = getExpressionsData(+mode.value);
-  const bestProb = generate(nums, formats.DEFAULT, +num);
-
-  result.textContent = `${+num}=${homo(nums, formats.DEFAULT, bestProb)(+num)}`;
-  footer.style.paddingTop = '0';
-
-  otherFormats.style.display = 'block';
-  const otherFormatsContent = homo(
-    nums,
-    formatsOrder[currentTab],
-    bestProb,
-  )(+num);
-  otherFormatsPre.textContent = otherFormatsContent;
-  otherFormatsChars.textContent = otherFormatsContent.length + '字符';
-  otherFormatsFormat.textContent = otherFormatsButtons[currentTab].textContent;
+function updateHash() {
+  if (input.value === '' && mode.value === '1234') {
+    window.location.hash = '';
+    return;
+  }
+  let hash: string = `#${input.value},${mode.value}`;
+  if (enableRandom.checked) {
+    hash = hash + ',1';
+  }
+  window.location.hash = hash;
 }
 
-function updateInput() {
+function updateOutput() {
   if (!isValidInput()) {
     result.textContent = '';
     footer.style.paddingTop = '50px';
     otherFormats.style.display = 'none';
     return;
   }
+
+  const num = input.value,
+    modeValue = +mode.value;
+  const nums = getExpressionsData(modeValue);
+  const bestProb = generate(nums, formats.DEFAULT, +num);
+
+  result.textContent = `${+num}=${homo(nums, formats.DEFAULT, bestProb)(+num)}`;
+  footer.style.paddingTop = '0';
+
+  otherFormats.style.display = 'block';
+  let otherFormatsContent;
+  if (currentTab !== 3) {
+    // 分享链接
+    otherFormatsContent = homo(nums, formatsOrder[currentTab], bestProb)(+num);
+  } else {
+    otherFormatsContent = window.location.toString();
+  }
+  otherFormatsPre.textContent = otherFormatsContent;
+  otherFormatsChars.textContent = otherFormatsContent.length + '字符';
+  otherFormatsFormat.textContent = otherFormatsButtons[currentTab].textContent;
+}
+
+function onInputChanged() {
+  updateHash();
   updateOutput();
 }
 
+// share link
+function loadShareLink() {
+  const parts = window.location.hash.slice(1).split(',');
+  if (parts.length === 0) return;
+  const [num, modeValue, enableRandomValue] = parts;
+  let changed = false;
+  if (!isNaN(+num)) {
+    input.value = num;
+    changed = true;
+  }
+  if (!isNaN(+modeValue)) {
+    mode.value = modeValue;
+    changed = true;
+  }
+  if (enableRandomValue === '0' || enableRandomValue === '1') {
+    enableRandom.checked = enableRandomValue === '1';
+    changed = true;
+  }
+  if (changed) {
+    updateOutput();
+  }
+}
+
+loadShareLink();
+window.addEventListener('hashchange', () => {
+  loadShareLink();
+});
+
+// events
 settings.addEventListener('submit', (e) => {
   e.preventDefault();
-  updateInput();
+  onInputChanged();
 });
 
 mode.addEventListener('input', () => {
-  updateInput();
+  onInputChanged();
 });
 
 enableRandom.addEventListener('input', () => {
-  updateInput();
+  onInputChanged();
 });
 
 input.addEventListener('input', () => {
-  updateInput();
+  onInputChanged();
 });

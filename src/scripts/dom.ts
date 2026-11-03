@@ -6,8 +6,7 @@ function requireElement<T extends HTMLElement>(
   if (import.meta.env.DEV && !el) {
     throw new Error(`Required element not found: ${selector}`);
   }
-  // @ts-ignore
-  return el;
+  return el!;
 }
 
 export const settings = requireElement<HTMLInputElement>('#settings');

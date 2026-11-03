@@ -17,8 +17,12 @@ import '../style.css';
 import { getExpressionsData } from './datagen';
 import { formats, type ExpressionTree, type Format } from './expression';
 
+declare global {
+  interface Window {
+    getExpressionsData: typeof getExpressionsData;
+  }
+}
 if (import.meta.env.DEV) {
-  // @ts-ignore
   window.getExpressionsData = getExpressionsData;
 }
 

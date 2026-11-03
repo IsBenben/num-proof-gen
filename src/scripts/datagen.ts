@@ -2,7 +2,7 @@ import { ExpressionLeaf, ExpressionNode, ExpressionTree } from './expression';
 
 const constructExpressionTrees = (
   numbers: readonly number[],
-  callback: (expression: ExpressionTree) => any,
+  callback: (expression: ExpressionTree) => void,
 ): void => {
   const dfs = (depth: number, expressions: ExpressionTree[]) => {
     if (expressions.length === 1) {
@@ -31,7 +31,7 @@ const constructExpressionTrees = (
 const arrangeNumbers = (
   digits: readonly string[],
   maxParts: number,
-  callback: (numbers: number[]) => any,
+  callback: (numbers: number[]) => void,
 ): void => {
   const arranged: number[] = [];
   const dfs = (index: number): void => {

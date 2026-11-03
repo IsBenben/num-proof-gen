@@ -31,7 +31,11 @@
         </div>
         <div class="checkbox-container">
           <label for="exact-division-only">仅允许整除</label>
-          <input type="checkbox" name="exact-division-only" id="exact-division-only" />
+          <input
+            type="checkbox"
+            name="exact-division-only"
+            id="exact-division-only"
+          />
         </div>
       </form>
       <p id="result"></p>
@@ -58,11 +62,23 @@
         <a href="#42,1024">用1024论证42</a>
         <a href="#114514,1919810">用1919810论证114514</a>
         <a href="#3.1415926,314">用314论证圆周率近似值</a>
+        <a href="#1314,520">用520论证1314</a>
+        <a href="#2.718281828,2718">用2718论证自然常数e</a>
         <a href="#date,year">用年份论证今天的日期</a>
-        <a href="#random,random" id="random-example">尝试更多随机例子 &gt;&gt;</a>
+        <a href="#random,random" id="random-example"
+          >尝试更多随机例子 &gt;&gt;</a
+        >
       </div>
     </div>
     <footer id="footer">
+      <p>
+        数字论证生成器（NumProof
+        Gen）是一个在浏览器本地运行的数学表达式生成工具：输入任意实数作为<strong>要论证的结果</strong>，再输入一串非负整数作为<strong>用于论证的数字</strong>，它会自动搜索由这些数字通过加、减、乘、除和乘方组成的表达式，实时给出形如
+        <code>1=12/3/4</code> 的等式。灵感来自 itorr 的“<a
+          href="https://github.com/itorr/homo"
+          >恶臭数字论证器</a
+        >”（homo），适合做数学趣味演示、表达式构造或代码生成测试。
+      </p>
       <a href="https://github.com/IsBenben/num-proof-gen" target="_blank">
         GitHub
       </a>

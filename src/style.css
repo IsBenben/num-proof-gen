@@ -1,5 +1,7 @@
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
+  scroll-padding-top: 70px;
 }
 
 body {
@@ -21,6 +23,17 @@ h1 {
 
 h2 {
   margin: 0.5em 0;
+}
+
+/* 无障碍 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  input[type='checkbox']::before {
+    transition: none;
+  }
 }
 
 /* 表单 */
@@ -119,17 +132,13 @@ pre {
   word-break: break-word;
 }
 
-#result,
-#other-formats,
-#getting-started {
+body {
   margin-left: 10vw;
   margin-right: 10vw;
 }
 
 @media (max-width: 720px) {
-  #result,
-  #other-formats,
-  #getting-started {
+  body {
     margin-left: 0;
     margin-right: 0;
   }
@@ -146,7 +155,8 @@ pre {
   border-radius: 8px;
 }
 
-pre {
+pre,
+code {
   font-family: Consolas, monospace;
   white-space: inherit;
 }

@@ -12,8 +12,8 @@ import {
   otherFormatsChars,
   otherFormatsFormat,
   footer,
-  randomExample,
   exactDivisionOnly,
+  gettingStarted,
 } from './dom';
 import { homo } from './generator';
 import { getExpressionsData } from './datagen';
@@ -181,10 +181,15 @@ window.addEventListener('hashchange', () => {
   loadShareLink();
 });
 
-randomExample.addEventListener('click', (e) => {
-  e.preventDefault();
-  window.location.hash = '#random,random';
-  loadShareLink();
+gettingStarted.forEach((anchor) => {
+  anchor.addEventListener('click', (e) => {
+    e.preventDefault();
+    const [num, modeValue] = anchor.hash.slice(1).split(',');
+    input.value = partToValue(num);
+    mode.value = partToValue(modeValue);
+    onInputChanged();
+    result.scrollIntoView();
+  });
 });
 
 // events

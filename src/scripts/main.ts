@@ -1,3 +1,4 @@
+import '../style.css';
 import {
   input,
   mode,
@@ -11,9 +12,9 @@ import {
   otherFormatsChars,
   otherFormatsFormat,
   footer,
+  randomExample,
 } from './dom';
 import { homo } from './generator';
-import '../style.css';
 import { getExpressionsData } from './datagen';
 import { formats, type ExpressionTree, type Format } from './expression';
 
@@ -120,16 +121,41 @@ function onInputChanged() {
 }
 
 // share link
+const getTodayDate = (): string => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}${month}${day}`;
+};
+
+const getCurrentYear = (): string => {
+  return new Date().getFullYear().toString();
+};
+
+const partToValue = (part: string): string =>
+  part === 'date'
+    ? getTodayDate()
+    : part === 'year'
+      ? getCurrentYear()
+      : part === 'random'
+        ? Math.floor(1e5 + Math.random() * 9e5).toString()
+        : isNaN(+part)
+          ? ''
+          : part;
+
 function loadShareLink() {
   const parts = window.location.hash.slice(1).split(',');
   if (parts.length === 0) return;
-  const [num, modeValue, enableRandomValue] = parts;
+  const num = partToValue(parts[0]),
+    modeValue = partToValue(parts[1]),
+    enableRandomValue = parts[2];
   let changed = false;
-  if (!isNaN(+num)) {
+  if (num !== '') {
     input.value = num;
     changed = true;
   }
-  if (!isNaN(+modeValue)) {
+  if (modeValue !== '') {
     mode.value = modeValue;
     changed = true;
   }
@@ -144,6 +170,12 @@ function loadShareLink() {
 
 loadShareLink();
 window.addEventListener('hashchange', () => {
+  loadShareLink();
+});
+
+randomExample.addEventListener('click', (e) => {
+  e.preventDefault();
+  window.location.hash = '#random,random';
   loadShareLink();
 });
 
